@@ -2,6 +2,21 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+
+def scatterpoints(clusters,centroids):
+    cmaps=['Blues','Reds','Purples','Greens','Oranges','YlOrRd']
+    for i in range(len(centroids)):
+        data = np.array(clusters[i])
+        x, y = data.T
+        if(i!=0):
+            plt.scatter(x, y,c=clusters[i+100],cmap=cmaps[i])
+        else:
+            plt.scatter(x, y)
+    data = np.array(centroids)
+    x , y = data.T
+    plt.scatter(x, y,s=200,color="red")
+    plt.show()
+
 def cost(memberships,values,centroids,m):
     res=0
     for j in range(len(values)):
@@ -22,7 +37,10 @@ def distance(A,B):
     temp=0
     for i in range(len(A)):
         temp += (A[i]-B[i])**2
-    return temp**0.5
+    if(temp!=0):
+        return temp**0.5
+    else:
+        return 0.00000001
 
 
 def calculatememberships(memberships,values,centroids,m):
@@ -57,6 +75,16 @@ def clustering_cmeans(dataset,C,m):
         calculate_centroids(memberships,values,centroids,m)
         calculatememberships(memberships,values,centroids,m)
         costs=cost(memberships,values,centroids,m)
+    clusters = {}
+    for i in range(C):
+        clusters[i] = []
+        clusters[i+100] = []
+    maxmemberships=np.amax(memberships,axis=0)
+    for i in range(len(values)):
+        temp=np.argmax(memberships[:,i])
+        clusters[temp].append(values[i])
+        clusters[temp+100].append(maxmemberships[i]*10)
+    scatterpoints(clusters,centroids)
     return costs
 
 
@@ -69,10 +97,11 @@ def clustering_cmeans(dataset,C,m):
 
 
 
-dataset = pd.read_csv("data3.csv",header=None)
+dataset = pd.read_csv("data1.csv",header=None)
 costs=[]
+index=[1,2,3,4,5,6]
 for i in range(1,7):
     print(i)
     costs.append(clustering_cmeans(dataset,i,2))
-plt.plot(costs)
+plt.plot(index,costs)
 plt.show()
